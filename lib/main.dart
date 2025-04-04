@@ -180,14 +180,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                     data: itens[index].code,
                                   ),
                                   SizedBox(
-                                    width: 200, // Largura fixa do container
-                                    child: FittedBox(
-                                      fit: BoxFit.fill,
-                                      child: Text(
-                                        itens[index].title ?? '',
-                                        style: TextStyle(
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                    width: 200, // Largura
+                                    child: Text(
+                                      itens[index].title ?? '',
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        overflow: TextOverflow.clip,
                                       ),
                                     ),
                                   ),
