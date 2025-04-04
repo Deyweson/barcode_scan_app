@@ -1,6 +1,8 @@
 import 'package:barcode_widget/barcode_widget.dart' as barcode_widget;
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:web_scraper/web_scraper.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,6 +37,7 @@ class MyApp extends StatelessWidget {
 
 class Item {
   String code;
+  String? title;
   int quantity;
   Item({required this.code, required this.quantity});
 }
@@ -58,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (itens.any((item) => item.code == result)) {
           itens.firstWhere((item) => item.code == result).quantity++;
         } else {
-          itens.add(Item(code: result, quantity: 1));
+          itens.insert(0, Item(code: result, quantity: 1));
         }
       });
     }
@@ -92,8 +95,55 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             GestureDetector(
-                              onTap: () {
+                              onTap: () async {
                                 debugPrint("Item: ${itens[index].code}");
+                                String title = '';
+
+                                if (itens[index].title != null) {
+                                  title = itens[index].title!;
+                                } else {
+                                  final Uri _url = Uri.parse(
+                                    'https://www.bing.com/search?q=${itens[index].code}',
+                                  );
+                                  if (!await launchUrl(_url)) {
+                                    throw Exception('Could not launch $_url');
+                                  }
+
+                                  final webScraper = WebScraper(
+                                    'https://www.bing.com',
+                                  );
+                                  String query = Uri.encodeQueryComponent(
+                                    itens[index].code,
+                                  );
+                                  if (await webScraper.loadWebPage(
+                                    '/search?q=$query',
+                                  )) {
+                                    // Processar os resultados
+                                  } else {
+                                    print('Falha ao carregar a página.');
+                                  }
+
+                                  var elements = webScraper.getElement(
+                                    'li.b_algo h2 a',
+                                    ['href'],
+                                  );
+                                  if (elements.isNotEmpty) {
+                                    title = elements[0]['title'];
+                                    if (itens[index].title == null) {
+                                      setState(() {
+                                        itens[index].title = title;
+                                      });
+                                    }
+                                    String link =
+                                        elements[0]['attributes']['href'];
+                                    print('Título: $title');
+                                    print('Link: $link');
+                                  } else {
+                                    print('Nenhum resultado encontrado.');
+                                    title = 'Nenhum resultado encontrado.';
+                                  }
+                                }
+
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -108,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     .Barcode.code128(),
                                             data: itens[index].code,
                                           ),
+                                          Text(title),
                                         ],
                                       ),
                                       actions: <Widget>[
@@ -122,9 +173,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                   },
                                 );
                               },
-                              child: barcode_widget.BarcodeWidget(
-                                barcode: barcode_widget.Barcode.code128(),
-                                data: itens[index].code,
+                              child: Column(
+                                children: [
+                                  barcode_widget.BarcodeWidget(
+                                    barcode: barcode_widget.Barcode.code128(),
+                                    data: itens[index].code,
+                                  ),
+                                  SizedBox(
+                                    width: 200, // Largura fixa do container
+                                    child: FittedBox(
+                                      fit: BoxFit.fill,
+                                      child: Text(
+                                        itens[index].title ?? '',
+                                        style: TextStyle(
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             Column(
