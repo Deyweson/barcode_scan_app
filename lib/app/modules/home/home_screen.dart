@@ -7,6 +7,7 @@ import 'package:barcode_widget/barcode_widget.dart' as barcode_widget;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
+import 'package:printing/printing.dart';
 import 'package:web_scraper/web_scraper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -29,9 +30,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result != null) {
       setState(() {
         if (controller.itemList.any((item) => item.code == result)) {
-          controller.itemList
-              .firstWhere((item) => item.code == result)
-              .quantity++;
+          controller.updateQuantity(
+            result,
+            controller.itemList
+                    .firstWhere((item) => item.code == result)
+                    .quantity +
+                1,
+          );
         } else {
           controller.addItems(Item(code: result, title: '', quantity: 1));
         }
@@ -62,6 +67,15 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text("Barcode Scan App", style: TextStyle(color: Colors.white)),
         leading: Icon(Icons.barcode_reader, color: Colors.red),
         backgroundColor: Colors.black,
+        actions: [
+          IconButton(
+            onPressed:
+                () => Printing.layoutPdf(
+                  onLayout: (format) => controller.generatePDF(),
+                ),
+            icon: Icon(Icons.picture_as_pdf, color: Colors.white),
+          ),
+        ],
       ),
       body: Obx(() {
         return Center(
