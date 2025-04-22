@@ -69,10 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.black,
         actions: [
           IconButton(
-            onPressed:
-                () => Printing.layoutPdf(
-                  onLayout: (format) => controller.generatePDF(),
-                ),
+            onPressed: controller.sharePdf,
             icon: Icon(Icons.picture_as_pdf, color: Colors.white),
           ),
         ],
@@ -84,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: ListView.builder(
-                  itemCount: controller.itemList.length,
+                  itemCount: controller.itemList.reversed.length,
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: EdgeInsets.all(8.0),

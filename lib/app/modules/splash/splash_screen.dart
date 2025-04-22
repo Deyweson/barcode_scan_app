@@ -7,10 +7,24 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedSplashScreen(
       splash: Center(
-        child: Image.asset('assets/icon.png', width: 200, height: 200),
+        child: Column(
+          children: [
+            Text(
+              'Bem vindo ao \n Barcode Scan App',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Icon(Icons.barcode_reader, size: 100, color: Colors.red),
+          ],
+        ),
       ),
+      backgroundColor: Colors.black,
       splashIconSize: 250,
-      duration: 2500,
+      duration: 5000,
       splashTransition: SplashTransition.scaleTransition,
       animationDuration: Duration(milliseconds: 800),
       nextScreen: HomeScreen(),
