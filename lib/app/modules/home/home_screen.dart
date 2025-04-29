@@ -96,59 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               GestureDetector(
                                 onTap: () async {
-                                  debugPrint(
-                                    "Item: ${controller.itemList[index].code}",
-                                  );
-                                  String title = '';
-
-                                  if (controller.itemList[index].title !=
-                                      null) {
-                                    title = controller.itemList[index].title!;
-                                  } else {
-                                    final Uri _url = Uri.parse(
-                                      'https://www.bing.com/search?q=${controller.itemList[index].code}',
-                                    );
-                                    if (!await launchUrl(_url)) {
-                                      throw Exception('Could not launch $_url');
-                                    }
-
-                                    final webScraper = WebScraper(
-                                      'https://www.bing.com',
-                                    );
-                                    String query = Uri.encodeQueryComponent(
-                                      controller.itemList[index].code,
-                                    );
-                                    if (await webScraper.loadWebPage(
-                                      '/search?q=$query',
-                                    )) {
-                                      // Processar os resultados
-                                    } else {
-                                      print('Falha ao carregar a página.');
-                                    }
-
-                                    var elements = webScraper.getElement(
-                                      'li.b_algo h2 a',
-                                      ['href'],
-                                    );
-                                    if (elements.isNotEmpty) {
-                                      title = elements[0]['title'];
-                                      if (controller.itemList[index].title ==
-                                          null) {
-                                        setState(() {
-                                          controller.itemList[index].title =
-                                              title;
-                                        });
-                                      }
-                                      String link =
-                                          elements[0]['attributes']['href'];
-                                      print('Título: $title');
-                                      print('Link: $link');
-                                    } else {
-                                      print('Nenhum resultado encontrado.');
-                                      title = 'Nenhum resultado encontrado.';
-                                    }
-                                  }
-
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
@@ -166,7 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       .itemList[index]
                                                       .code,
                                             ),
-                                            Text(title),
                                           ],
                                         ),
                                         actions: <Widget>[
@@ -175,6 +121,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              final Uri url = Uri.parse(
+                                                'https://www.google.com/search?q=${controller.itemList[index].code}',
+                                              );
+                                              launchUrl(
+                                                url,
+                                                mode:
+                                                    LaunchMode.inAppBrowserView,
+                                              );
+                                            },
+                                            child: Text('Buscar no Google'),
                                           ),
                                         ],
                                       );
